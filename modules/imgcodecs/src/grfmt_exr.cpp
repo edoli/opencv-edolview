@@ -185,6 +185,10 @@ bool  ExrDecoder::readHeader()
         if( !m_green )
         {
             m_green = channels.findChannel( "Z" ); // Distance of the front of a sample from the viewer
+            m_singleName = "Z";
+        } else 
+        {
+            m_singleName = "Y";
         }
         if( m_green )
         {
@@ -195,7 +199,31 @@ bool  ExrDecoder::readHeader()
             result = true;
         }
         else
-            result = false;
+        {
+            // Find any single channel and use it as grayscale
+            ChannelList::ConstIterator it  = channels.begin();
+            if (it != channels.end())
+            {
+                ChannelList::ConstIterator it2 = it;
+                ++it2;
+                if (it2 == channels.end())
+                {
+                    m_green = &it.channel();
+                    m_singleName = it.name();
+                    m_iscolor = false;
+                    m_ischroma = true;
+                    result = true;
+                }
+                else
+                {
+                    result = false;
+                }
+            }
+            else
+            {
+                result = false;
+            }
+        }
     }
 
     if( result )
@@ -306,7 +334,7 @@ bool  ExrDecoder::readData( Mat& img )
         }
         else
         {
-            frame.insert( "Y", Slice( m_type,
+            frame.insert( m_singleName.c_str(), Slice( m_type,
                             buffer - m_datawindow.min.x * xStride - m_datawindow.min.y * ystep,
                             xStride, ystep, m_green->xSampling, m_green->ySampling, 0.0 ));
             xsample[0] = m_green->xSampling;

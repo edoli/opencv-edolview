@@ -94,6 +94,7 @@ protected:
     const Channel  *m_green;
     const Channel  *m_blue;
     const Channel  *m_alpha;
+    std::string     m_singleName;
     Chromaticities  m_chroma;
     int             m_bit_depth;
     bool            m_native_depth;
